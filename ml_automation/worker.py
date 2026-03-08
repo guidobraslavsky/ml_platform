@@ -1,59 +1,109 @@
 import time
+import logging
 
-from db import (
+from ml_core.ml_api import MercadoLibreClient
+from ml_core.db import (
+    queue_event,
     get_pending_event,
-    mark_done,
-    increment_attempts,
+    mark_event_done,
 )
 
-from ml_api import (
-    get_shipment,
-    get_shipping_label,
+from ml_core.config import LOG_FILE
+
+logging.basicConfig(
+    filename=LOG_FILE,
+    level=logging.INFO,
+    format="%(asctime)s | %(levelname)s | %(message)s",
 )
 
-MAX_ATTEMPTS = 5
+POLL_INTERVAL = 10
+
+orders_detected = 0
+events_processed = 0
+labels_printed = 0
+errors = 0
+
+ml = MercadoLibreClient()
 
 
-def process_event(event):
+def detect_new_orders():
 
-    event_id, resource_id = event
+    global orders_detected
 
-    print("Procesando evento:", resource_id)
+    orders = ml.get_orders_ready_to_ship()
 
-    shipment = get_shipment(resource_id)
+    for order in orders:
 
-    if not shipment:
-        raise Exception("Shipment no disponible")
+        shipment_id = order["shipment_id"]
 
-    label = get_shipping_label(resource_id)
+        queue_event("print_label", shipment_id)
 
-    if not label:
-        raise Exception("Etiqueta no disponible")
-
-    # enviar a impresora
-    print("Etiqueta lista")
+        orders_detected += 1
 
 
-while True:
+def process_events():
+
+    global events_processed, labels_printed
 
     event = get_pending_event()
 
     if not event:
-        time.sleep(2)
-        continue
+        return
 
-    event_id = event[0]
+    shipment_id = event["resource_id"]
 
-    try:
+    label = ml.get_shipping_label(shipment_id)
 
-        process_event(event)
+    if not label:
+        return
 
-        mark_done(event_id)
+    print(label)
 
-    except Exception as e:
+    mark_event_done(event["id"])
 
-        print("Error:", e)
+    events_processed += 1
+    labels_printed += 1
 
-        increment_attempts(event_id)
 
-        time.sleep(3)
+def worker():
+
+    logging.info("🚀 Worker iniciado")
+
+    loop_count = 0
+
+    while True:
+
+        try:
+
+            detect_new_orders()
+
+            process_events()
+
+            loop_count += 1
+
+            if loop_count % 20 == 0:
+                print_metrics()
+
+        except Exception as e:
+
+            errors += 1
+
+            print("Worker error:", e)
+
+        time.sleep(POLL_INTERVAL)
+
+
+def print_metrics():
+
+    print("📊 Worker metrics")
+
+    print("Orders detected:", orders_detected)
+    print("Events processed:", events_processed)
+    print("Labels printed:", labels_printed)
+    print("Errors:", errors)
+
+    print("-" * 30)
+
+
+if __name__ == "__main__":
+    worker()

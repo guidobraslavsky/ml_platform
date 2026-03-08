@@ -1,47 +1,134 @@
 import requests
+import time
+
 from .token_manager import get_access_token
+from .logger_config import setup_logger
+
+logger = setup_logger()
 
 BASE_URL = "https://api.mercadolibre.com"
 
-
-def get_headers():
-    return {
-        "Authorization": f"Bearer {get_access_token()}",
-        "Content-Type": "application/json",
-    }
+MAX_RETRIES = 3
+RETRY_DELAY = 2
 
 
-def get_order(order_id):
+class MercadoLibreClient:
 
-    url = f"{BASE_URL}/orders/{order_id}"
+    def __init__(self):
+        self.base_url = BASE_URL
 
-    r = requests.get(url, headers=get_headers())
+    def _headers(self):
+        return {
+            "Authorization": f"Bearer {get_access_token()}",
+            "Content-Type": "application/json",
+        }
 
-    if r.status_code == 200:
-        return r.json()
+    def _request(self, method, endpoint, payload=None):
 
-    return None
+        url = f"{self.base_url}{endpoint}"
 
+        for attempt in range(MAX_RETRIES):
 
-def get_shipment(shipment_id):
+            try:
 
-    url = f"{BASE_URL}/shipments/{shipment_id}"
+                if method == "GET":
+                    r = requests.get(url, headers=self._headers())
 
-    r = requests.get(url, headers=get_headers())
+                elif method == "POST":
+                    r = requests.post(url, headers=self._headers(), json=payload)
 
-    if r.status_code == 200:
-        return r.json()
+                else:
+                    raise ValueError("Unsupported HTTP method")
 
-    return None
+                if r.status_code in (200, 201):
+                    return r.json()
 
+                # retry en rate limit
+                if r.status_code == 429:
+                    logger.warning("⚠ Rate limit hit, retrying...")
+                    time.sleep(RETRY_DELAY)
+                    continue
 
-def get_shipping_label(shipment_id):
+                logger.error(f"ML API error {r.status_code}: {r.text}")
+                return None
 
-    url = f"{BASE_URL}/shipment_labels?shipment_ids={shipment_id}&response_type=zpl"
+            except requests.RequestException as e:
 
-    r = requests.get(url, headers=get_headers())
+                logger.error(f"Request error: {e}")
 
-    if r.status_code == 200:
-        return r.text
+                time.sleep(RETRY_DELAY)
 
-    return None
+        return None
+
+    # =========================
+    # USERS
+    # =========================
+
+    def get_user(self):
+
+        return self._request("GET", "/users/me")
+
+    # =========================
+    # ORDERS
+    # =========================
+
+    def get_order(self, order_id):
+
+        return self._request("GET", f"/orders/{order_id}")
+
+    def get_recent_orders(self, limit=10):
+
+        data = self._request(
+            "GET",
+            f"/orders/search?seller=me&sort=date_desc&limit={limit}",
+        )
+
+        if not data:
+            return []
+
+        return data.get("results", [])
+
+    # =========================
+    # SHIPMENTS
+    # =========================
+
+    def get_shipment(self, shipment_id):
+
+        return self._request("GET", f"/shipments/{shipment_id}")
+
+    # =========================
+    # LABELS
+    # =========================
+
+    def get_shipping_label(self, shipment_id):
+
+        url = f"{self.base_url}/shipment_labels?shipment_ids={shipment_id}&response_type=zpl"
+
+        try:
+
+            r = requests.get(url, headers=self._headers())
+
+            if r.status_code == 200:
+                return r.text
+
+            logger.error(f"Label error {r.status_code}: {r.text}")
+
+        except requests.RequestException as e:
+
+            logger.error(f"Label request error: {e}")
+
+        return None
+
+    # =========================
+    # MESSAGES
+    # =========================
+
+    def reply_to_buyer(self, order_id, message):
+
+        payload = {"text": message}
+
+        return self._request(
+            "POST",
+            f"/messages/orders/{order_id}",
+            payload,
+        )
