@@ -1,0 +1,12 @@
+[project]
+name = "ml_core"
+version = "0.1.0"
+description = "Shared Mercado Libre API utilities"
+authors = [{name="Guido"}]
+dependencies = [
+    "requests"
+]
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
