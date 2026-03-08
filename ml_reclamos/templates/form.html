@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Soporte postventa</title>
+
+    <style>
+        body {
+            font-family: Arial;
+            background: #f5f5f5;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 500px;
+            margin: auto;
+            background: white;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        input,
+        textarea,
+        select {
+
+            width: 100%;
+            padding: 12px;
+            margin-top: 8px;
+            margin-bottom: 15px;
+
+            border: 1px solid #ccc;
+            border-radius: 6px;
+
+            font-size: 16px;
+
+        }
+
+        input[type=file] {
+            border: none;
+        }
+
+        button {
+
+            width: 100%;
+            padding: 15px;
+
+            background: #3483fa;
+            color: white;
+
+            border: none;
+            border-radius: 6px;
+
+            font-size: 18px;
+
+            cursor: pointer;
+
+        }
+
+        button:hover {
+            background: #2968c8;
+        }
+
+        .success {
+
+            display: none;
+            text-align: center;
+            color: green;
+            font-weight: bold;
+            margin-top: 20px;
+
+        }
+
+        .preview {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .preview img {
+            max-width: 100%;
+            max-height: 200px;
+            border-radius: 6px;
+        }
+    </style>
+
+</head>
+
+<body>
+
+    <div class="container">
+
+        <h2>¿Tuviste algún problema con tu producto?</h2>
+
+        <form id="reclamoForm" enctype="multipart/form-data">
+
+            <input name="nombre" placeholder="Nombre" required>
+
+            <input name="pedido_ml" id="pedido_ml" placeholder="Número de pedido Mercado Libre" required>
+
+            <input name="contacto" placeholder="Email o WhatsApp" required>
+
+            <input name="producto" id="producto" placeholder="Producto" readonly>
+
+            <select name="tipo">
+
+                <option>Producto dañado</option>
+                <option>Falta pieza</option>
+                <option>No funciona</option>
+                <option>Otro</option>
+
+            </select>
+
+            <textarea name="descripcion" placeholder="Descripción del problema"></textarea>
+
+            <label>Subir foto del producto</label>
+
+            <input type="file" name="foto" id="foto" accept="image/*">
+
+            <div class="preview">
+                <img id="previewImg" style="display:none;">
+            </div>
+
+            <button type="submit">
+                Enviar reclamo
+            </button>
+
+        </form>
+
+        <p class="success" id="successMsg">
+            Reclamo enviado correctamente. Te responderemos pronto.
+        </p>
+
+    </div>
+
+    <script>
+
+        /* AUTOCOMPLETAR PRODUCTO */
+
+        const pedidoInput = document.getElementById("pedido_ml")
+        const productoInput = document.getElementById("producto")
+
+        pedidoInput.addEventListener("blur", async () => {
+
+            const order = pedidoInput.value
+
+            if (!order) return
+
+            try {
+
+                const response = await fetch(`/order_info?order=${order}`)
+
+                const data = await response.json()
+
+                if (data.producto) {
+                    productoInput.value = data.producto
+                }
+
+            } catch (e) {
+                console.log("error consultando pedido")
+            }
+
+        })
+
+
+        /* PREVIEW FOTO */
+
+        const fotoInput = document.getElementById("foto")
+        const preview = document.getElementById("previewImg")
+
+        fotoInput.addEventListener("change", function () {
+
+            const file = this.files[0]
+
+            if (file) {
+
+                preview.src = URL.createObjectURL(file)
+                preview.style.display = "block"
+
+            }
+
+        })
+
+
+        /* ENVIAR FORMULARIO */
+
+        const form = document.getElementById("reclamoForm")
+
+        form.addEventListener("submit", async (e) => {
+
+            e.preventDefault()
+
+            const formData = new FormData(form)
+
+            await fetch("/complaint", {
+
+                method: "POST",
+                body: formData
+
+            })
+
+            form.style.display = "none"
+
+            document.getElementById("successMsg").style.display = "block"
+
+        })
+
+    </script>
+
+</body>
+
+</html>
