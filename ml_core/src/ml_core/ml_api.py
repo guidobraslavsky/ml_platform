@@ -132,3 +132,35 @@ class MercadoLibreClient:
             f"/messages/orders/{order_id}",
             payload,
         )
+
+    def get_orders_ready_to_ship(self, limit=20):
+
+        orders = self.get_recent_orders(limit)
+
+        ready_orders = []
+
+        for order in orders:
+
+            shipment_id = order.get("shipping", {}).get("id")
+
+            if not shipment_id:
+                continue
+
+            shipment = self.get_shipment(shipment_id)
+
+            if not shipment:
+                continue
+
+            status = shipment.get("status")
+
+            if status == "ready_to_ship":
+
+                ready_orders.append(
+                    {
+                        "order_id": order["id"],
+                        "shipment_id": shipment_id,
+                        "status": status,
+                    }
+                )
+
+        return ready_orders

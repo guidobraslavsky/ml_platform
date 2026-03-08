@@ -1,12 +1,16 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
 [project]
 name = "ml_core"
 version = "0.1.0"
-description = "Shared Mercado Libre API utilities"
-authors = [{name="Guido"}]
-dependencies = [
-    "requests"
-]
+description = "Mercado Libre automation core"
+authors = [{name = "Guido Braslavsky"}]
+requires-python = ">=3.10"
 
-[build-system]
-requires = ["setuptools"]
-build-backend = "setuptools.build_meta"
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[project.scripts]
+ml = "ml_core.cli:cli"

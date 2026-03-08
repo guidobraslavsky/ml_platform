@@ -1,75 +1,95 @@
 import time
-import logging
+import traceback
 
 from ml_core.ml_api import MercadoLibreClient
 from ml_core.db import (
     queue_event,
     get_pending_event,
     mark_event_done,
+    increment_attempts,
+    is_shipment_already_printed,
+    mark_shipment_printed,
 )
 
-from ml_core.config import LOG_FILE
+from ml_automation.print_service import imprimir_zpl
 
-logging.basicConfig(
-    filename=LOG_FILE,
-    level=logging.INFO,
-    format="%(asctime)s | %(levelname)s | %(message)s",
-)
-
-POLL_INTERVAL = 10
-
-orders_detected = 0
-events_processed = 0
-labels_printed = 0
-errors = 0
 
 ml = MercadoLibreClient()
+
+POLL_INTERVAL = 10
 
 
 def detect_new_orders():
 
-    global orders_detected
-
     orders = ml.get_orders_ready_to_ship()
+
+    if not orders:
+        return
 
     for order in orders:
 
         shipment_id = order["shipment_id"]
 
+        if is_shipment_already_printed(shipment_id):
+            continue
+
+        print("📦 Nueva orden:", shipment_id)
+
         queue_event("print_label", shipment_id)
 
-        orders_detected += 1
 
-
-def process_events():
-
-    global events_processed, labels_printed
+def process_event():
 
     event = get_pending_event()
 
     if not event:
         return
 
+    event_id = event["id"]
     shipment_id = event["resource_id"]
 
-    label = ml.get_shipping_label(shipment_id)
+    print("⚙ Procesando shipment:", shipment_id)
 
-    if not label:
-        return
+    try:
 
-    print(label)
+        if is_shipment_already_printed(shipment_id):
 
-    mark_event_done(event["id"])
+            print("⚠ Ya fue impreso")
 
-    events_processed += 1
-    labels_printed += 1
+            mark_event_done(event_id)
+
+            return
+
+        label_zpl = ml.get_shipping_label(shipment_id)
+
+        if not label_zpl:
+
+            print("❌ No se pudo obtener etiqueta")
+
+            increment_attempts(event_id)
+
+            return
+
+        imprimir_zpl(label_zpl)
+
+        mark_shipment_printed(shipment_id)
+
+        mark_event_done(event_id)
+
+        print("✅ Etiqueta impresa")
+
+    except Exception as e:
+
+        print("❌ Error procesando evento")
+
+        traceback.print_exc()
+
+        increment_attempts(event_id)
 
 
 def worker():
 
-    logging.info("🚀 Worker iniciado")
-
-    loop_count = 0
+    print("🚀 Worker iniciado")
 
     while True:
 
@@ -77,32 +97,13 @@ def worker():
 
             detect_new_orders()
 
-            process_events()
-
-            loop_count += 1
-
-            if loop_count % 20 == 0:
-                print_metrics()
+            process_event()
 
         except Exception as e:
-
-            errors += 1
 
             print("Worker error:", e)
 
         time.sleep(POLL_INTERVAL)
-
-
-def print_metrics():
-
-    print("📊 Worker metrics")
-
-    print("Orders detected:", orders_detected)
-    print("Events processed:", events_processed)
-    print("Labels printed:", labels_printed)
-    print("Errors:", errors)
-
-    print("-" * 30)
 
 
 if __name__ == "__main__":
