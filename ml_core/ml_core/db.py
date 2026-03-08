@@ -2,8 +2,8 @@
 import sqlite3
 import os
 import time
-from config import DB_NAME
-from logger_config import setup_logger
+from .config import DB_NAME
+from .logger_config import setup_logger
 
 logger = setup_logger()
 

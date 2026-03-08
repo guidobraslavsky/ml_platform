@@ -1,5 +1,5 @@
 import requests
-from token_manager import get_access_token
+from .token_manager import get_access_token
 
 BASE_URL = "https://api.mercadolibre.com"
 

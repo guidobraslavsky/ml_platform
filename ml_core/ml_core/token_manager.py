@@ -1,8 +1,8 @@
 import time
 import requests
-from config import CLIENT_ID, CLIENT_SECRET
-from db import get_token, save_token
-from notifier import send_notification
+from .config import CLIENT_ID, CLIENT_SECRET
+from .db import get_token, save_token
+from .notifier import send_notification
 
 TOKEN_CACHE = None
 

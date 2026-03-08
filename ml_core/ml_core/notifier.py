@@ -1,6 +1,6 @@
 import requests
-from config import TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID
-from logger_config import setup_logger
+from .config import TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID
+from .logger_config import setup_logger
 
 import requests
 import logging
