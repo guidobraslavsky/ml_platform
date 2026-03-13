@@ -32,3 +32,24 @@ def enviar_email(cliente_email, nombre, pedido, producto):
         """,
         }
     )
+
+
+def enviar_email_resuelto(email, nombre, pedido, producto):
+
+    subject = f"Reclamo resuelto - Pedido {pedido}"
+
+    mensaje = f"""
+Hola {nombre},
+
+Tu reclamo sobre el producto:
+
+{producto}
+
+ya fue resuelto por nuestro equipo.
+
+Si necesitas más ayuda puedes responder a este email.
+
+Gracias por tu compra.
+"""
+
+    enviar_email(email, nombre, pedido, producto)

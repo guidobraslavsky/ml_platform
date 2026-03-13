@@ -6,13 +6,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <title>Panel Reclamos</title>
+    <title>Panel de Reclamos</title>
 
     <style>
         body {
             font-family: Arial;
             background: #f5f5f5;
-            margin: 40px;
+            margin: 30px;
         }
 
         .container {
@@ -34,7 +34,7 @@
         td {
             padding: 10px;
             border: 1px solid #ddd;
-            text-align: left;
+            vertical-align: top;
         }
 
         th {
@@ -51,6 +51,7 @@
             border: none;
             border-radius: 4px;
             cursor: pointer;
+            margin-top: 4px;
         }
 
         .email {
@@ -91,6 +92,12 @@
             border-radius: 4px;
             margin-right: 5px;
         }
+
+        textarea {
+            width: 100%;
+            padding: 6px;
+            margin-top: 5px;
+        }
     </style>
 
 </head>
@@ -126,9 +133,7 @@
                 <th>Descripción</th>
                 <th>Fotos</th>
                 <th>Estado</th>
-                <th>Email</th>
-                <th>WhatsApp</th>
-                <th>Acción</th>
+                <th>Acciones</th>
 
             </tr>
 
@@ -137,11 +142,17 @@
             <tr>
 
                 <td>{{ r.id }}</td>
+
                 <td>{{ r.fecha }}</td>
+
                 <td>{{ r.pedido_ml }}</td>
+
                 <td>{{ r.nombre }}</td>
+
                 <td>{{ r.producto }}</td>
+
                 <td>{{ r.tipo }}</td>
+
                 <td>{{ r.descripcion }}</td>
 
                 <td>
@@ -172,45 +183,37 @@
 
                 <td>
 
-                    <a href="mailto:{{ r.contacto }}?subject=Respuesta reclamo pedido {{ r.pedido_ml }}">
-
+                    <a href="mailto:{{ r.contacto }}?subject=Reclamo pedido {{ r.pedido_ml }}">
                         <button class="email">
                             Email
                         </button>
-
                     </a>
 
-                </td>
-
-                <td>
-
                     <a href="https://wa.me/{{ r.contacto }}" target="_blank">
-
                         <button class="whatsapp">
                             WhatsApp
                         </button>
-
                     </a>
-
-                </td>
-
-                <td>
 
                     {% if r.estado != "resuelto" %}
 
                     <a href="/resolver/{{ r.id }}">
-
                         <button class="resolver">
-                            Marcar resuelto
+                            Resolver Reclamo
                         </button>
-
                     </a>
 
-                    {% else %}
-
-                    ✔
-
                     {% endif %}
+
+                    <form action="/responder/{{ r.id }}" method="POST">
+
+                        <textarea name="mensaje" placeholder="Responder al cliente" required></textarea>
+
+                        <button type="submit">
+                            Enviar respuesta
+                        </button>
+
+                    </form>
 
                 </td>
 

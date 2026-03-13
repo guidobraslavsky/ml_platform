@@ -86,6 +86,28 @@ def obtener_reclamos():
     return rows
 
 
+def obtener_reclamo(reclamo_id):
+
+    conn = sqlite3.connect(DB)
+    conn.row_factory = sqlite3.Row
+    cur = conn.cursor()
+
+    cur.execute(
+        """
+        SELECT *
+        FROM reclamos
+        WHERE id = ?
+        """,
+        (reclamo_id,),
+    )
+
+    reclamo = cur.fetchone()
+
+    conn.close()
+
+    return reclamo
+
+
 def marcar_resuelto(reclamo_id):
 
     conn = sqlite3.connect(DB)
@@ -108,17 +130,15 @@ def buscar_reclamo_por_pedido(pedido):
 
     conn = sqlite3.connect(DB)
     conn.row_factory = sqlite3.Row
-
     cur = conn.cursor()
 
     cur.execute(
         """
-        SELECT *
-        FROM reclamos
-        WHERE pedido_ml LIKE ?
+        SELECT * FROM reclamos
+        WHERE pedido_ml = ?
         ORDER BY fecha DESC
         """,
-        (f"%{pedido}%",),
+        (pedido,),
     )
 
     rows = cur.fetchall()

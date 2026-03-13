@@ -67,24 +67,6 @@
             background: #2968c8;
         }
 
-        .preview img {
-            max-width: 100%;
-            max-height: 120px;
-            margin-top: 10px;
-            border-radius: 6px;
-        }
-
-        .productoInfo {
-            display: none;
-            text-align: center;
-            margin-bottom: 20px;
-        }
-
-        .productoInfo img {
-            max-width: 120px;
-            border-radius: 6px;
-        }
-
         .success {
 
             display: none;
@@ -93,6 +75,12 @@
             font-weight: bold;
             margin-top: 20px;
 
+        }
+
+        .preview img {
+            max-width: 100px;
+            margin-top: 10px;
+            border-radius: 6px;
         }
     </style>
 
@@ -108,19 +96,11 @@
 
             <input name="nombre" placeholder="Nombre" required>
 
-            <input name="pedido_ml" id="pedido_ml" placeholder="Número de pedido Mercado Libre" required>
-
-            <div id="productoInfo" class="productoInfo">
-
-                <img id="productoFoto">
-
-                <p id="productoTitulo"></p>
-
-            </div>
+            <input name="pedido_ml" placeholder="Número de pedido Mercado Libre" required>
 
             <input name="contacto" placeholder="Email o WhatsApp" required>
 
-            <input name="producto" id="producto" placeholder="Producto" readonly>
+            <input name="producto" placeholder="Producto" required>
 
             <select name="tipo">
 
@@ -134,13 +114,13 @@
             <textarea name="descripcion" placeholder="Descripción del problema"></textarea>
 
             <label>Foto del producto</label>
-            <input type="file" name="foto1" id="foto1" accept="image/*">
+            <input type="file" name="foto1" accept="image/*">
 
             <label>Otra foto (opcional)</label>
-            <input type="file" name="foto2" id="foto2" accept="image/*">
+            <input type="file" name="foto2" accept="image/*">
 
             <label>Tercera foto (opcional)</label>
-            <input type="file" name="foto3" id="foto3" accept="image/*">
+            <input type="file" name="foto3" accept="image/*">
 
             <button type="submit">
                 Enviar reclamo
@@ -156,57 +136,7 @@
 
     <script>
 
-        /* ELEMENTOS */
-
-        const pedidoInput = document.getElementById("pedido_ml")
-        const productoInput = document.getElementById("producto")
-
-        const productoInfo = document.getElementById("productoInfo")
-        const productoFoto = document.getElementById("productoFoto")
-        const productoTitulo = document.getElementById("productoTitulo")
-
-
-        /* AUTOCOMPLETAR PRODUCTO DESDE ML */
-
-        pedidoInput.addEventListener("blur", async () => {
-
-            const order = pedidoInput.value
-
-            if (!order) return
-
-            try {
-
-                const response = await fetch(`/order_info?order=${order}`)
-
-                const data = await response.json()
-
-                if (data.ok) {
-
-                    productoInput.value = data.producto
-
-                    productoInfo.style.display = "block"
-
-                    productoFoto.src = data.foto
-
-                    productoTitulo.innerHTML = `
-<b>${data.producto}</b><br>
-Cantidad: ${data.cantidad}<br>
-Precio: $${data.precio}<br>
-Fecha: ${data.fecha}
-`
-
-                }
-
-            } catch (e) {
-
-                console.log("Error consultando pedido")
-
-            }
-
-        })
-
-
-        /* PREVIEW IMAGENES */
+        /* PREVIEW IMÁGENES */
 
         function preview(input) {
 
@@ -220,8 +150,6 @@ Fecha: ${data.fecha}
 
                     img.src = URL.createObjectURL(file)
 
-                    img.style.maxWidth = "100px"
-
                     this.parentNode.appendChild(img)
 
                 }
@@ -230,9 +158,9 @@ Fecha: ${data.fecha}
 
         }
 
-        preview(document.getElementById("foto1"))
-        preview(document.getElementById("foto2"))
-        preview(document.getElementById("foto3"))
+        preview(document.querySelector("input[name='foto1']"))
+        preview(document.querySelector("input[name='foto2']"))
+        preview(document.querySelector("input[name='foto3']"))
 
 
         /* ENVIAR FORMULARIO */
