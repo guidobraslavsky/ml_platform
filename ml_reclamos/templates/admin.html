@@ -11,16 +11,14 @@
     <style>
         body {
             font-family: Arial;
-            margin: 40px;
             background: #f5f5f5;
+            margin: 40px;
         }
 
         .container {
-
             background: white;
             padding: 20px;
             border-radius: 8px;
-
         }
 
         h2 {
@@ -28,41 +26,31 @@
         }
 
         table {
-
             width: 100%;
             border-collapse: collapse;
-
         }
 
         th,
         td {
-
             padding: 10px;
             border: 1px solid #ddd;
             text-align: left;
-
         }
 
         th {
-
             background: #3483fa;
             color: white;
-
         }
 
         tr:nth-child(even) {
-
             background: #f2f2f2;
-
         }
 
         button {
-
             padding: 6px 10px;
             border: none;
             border-radius: 4px;
             cursor: pointer;
-
         }
 
         .email {
@@ -81,29 +69,27 @@
         }
 
         .resuelto {
-
             color: green;
             font-weight: bold;
-
         }
 
         .search {
-
             margin-bottom: 20px;
-
         }
 
         .search input {
-
             padding: 8px;
             width: 200px;
-
         }
 
         .search button {
-
             padding: 8px;
+        }
 
+        img {
+            max-width: 80px;
+            border-radius: 4px;
+            margin-right: 5px;
         }
     </style>
 
@@ -119,7 +105,7 @@
 
             <form method="GET" action="/admin">
 
-                <input name="pedido" placeholder="Buscar por pedido">
+                <input name="pedido" placeholder="Buscar pedido">
 
                 <button>Buscar</button>
 
@@ -138,6 +124,7 @@
                 <th>Producto</th>
                 <th>Tipo</th>
                 <th>Descripción</th>
+                <th>Fotos</th>
                 <th>Estado</th>
                 <th>Email</th>
                 <th>WhatsApp</th>
@@ -150,29 +137,35 @@
             <tr>
 
                 <td>{{ r.id }}</td>
-
                 <td>{{ r.fecha }}</td>
-
                 <td>{{ r.pedido_ml }}</td>
-
                 <td>{{ r.nombre }}</td>
-
                 <td>{{ r.producto }}</td>
-
                 <td>{{ r.tipo }}</td>
-
                 <td>{{ r.descripcion }}</td>
 
                 <td>
 
+                    {% if r.foto1 %}
+                    <img src="/uploads/{{ r.foto1 }}">
+                    {% endif %}
+
+                    {% if r.foto2 %}
+                    <img src="/uploads/{{ r.foto2 }}">
+                    {% endif %}
+
+                    {% if r.foto3 %}
+                    <img src="/uploads/{{ r.foto3 }}">
+                    {% endif %}
+
+                </td>
+
+                <td>
+
                     {% if r.estado == "resuelto" %}
-
                     <span class="resuelto">Resuelto</span>
-
                     {% else %}
-
                     Pendiente
-
                     {% endif %}
 
                 </td>
@@ -181,7 +174,9 @@
 
                     <a href="mailto:{{ r.contacto }}?subject=Respuesta reclamo pedido {{ r.pedido_ml }}">
 
-                        <button class="email">Email</button>
+                        <button class="email">
+                            Email
+                        </button>
 
                     </a>
 
@@ -191,7 +186,9 @@
 
                     <a href="https://wa.me/{{ r.contacto }}" target="_blank">
 
-                        <button class="whatsapp">WhatsApp</button>
+                        <button class="whatsapp">
+                            WhatsApp
+                        </button>
 
                     </a>
 
@@ -204,9 +201,7 @@
                     <a href="/resolver/{{ r.id }}">
 
                         <button class="resolver">
-
                             Marcar resuelto
-
                         </button>
 
                     </a>

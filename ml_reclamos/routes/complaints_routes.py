@@ -7,6 +7,8 @@ import os
 
 complaint_bp = Blueprint("complaints", __name__)
 
+UPLOAD_FOLDER = "uploads"
+
 
 @complaint_bp.route("/")
 def form():
@@ -28,23 +30,42 @@ def complaint():
         "producto": request.form.get("producto"),
         "tipo": request.form.get("tipo"),
         "descripcion": request.form.get("descripcion"),
+        "foto1": None,
+        "foto2": None,
+        "foto3": None,
     }
 
     guardar_reclamo(data)
 
-    producto_real = obtener_producto(data["pedido_ml"])
+    try:
+        producto_real = obtener_producto(data["pedido_ml"])
+    except Exception as e:
+        print("ERROR ML:", e)
+        producto_real = data["producto"]
 
-    enviar_email(data["contacto"], data["nombre"], data["pedido_ml"], producto_real)
+    try:
 
-    enviar_telegram(
-        f"""
+        enviar_email(data["contacto"], data["nombre"], data["pedido_ml"], producto_real)
+
+    except Exception as e:
+
+        print("ERROR EMAIL:", e)
+
+    try:
+
+        enviar_telegram(
+            f"""
 Nuevo reclamo
 
 Pedido: {data['pedido_ml']}
 Cliente: {data['nombre']}
 Producto: {producto_real}
 """
-    )
+        )
+
+    except Exception as e:
+
+        print("ERROR TELEGRAM:", e)
 
     return {"status": "ok"}
 

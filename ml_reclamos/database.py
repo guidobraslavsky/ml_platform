@@ -24,7 +24,9 @@ def init_db():
         producto TEXT,
         tipo TEXT,
         descripcion TEXT,
-        foto TEXT,
+        foto1 TEXT,
+        foto2 TEXT,
+        foto3 TEXT,
         estado TEXT DEFAULT 'pendiente'
     )
     """
@@ -42,8 +44,8 @@ def guardar_reclamo(data):
     cur.execute(
         """
         INSERT INTO reclamos
-        (nombre,pedido_ml,contacto,producto,tipo,descripcion,foto)
-        VALUES (?,?,?,?,?,?,?)
+        (nombre,pedido_ml,contacto,producto,tipo,descripcion,foto1,foto2,foto3)
+        VALUES (?,?,?,?,?,?,?,?,?)
         """,
         (
             data["nombre"],
@@ -52,7 +54,9 @@ def guardar_reclamo(data):
             data["producto"],
             data["tipo"],
             data["descripcion"],
-            data["foto"],
+            data.get("foto1"),
+            data.get("foto2"),
+            data.get("foto3"),
         ),
     )
 
