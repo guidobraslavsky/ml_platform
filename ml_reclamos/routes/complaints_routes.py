@@ -23,6 +23,26 @@ def complaint():
 
     print("RECLAMO RECIBIDO")
 
+    fotos = []
+
+    for campo in ["foto1", "foto2", "foto3"]:
+
+        file = request.files.get(campo)
+
+        if file and file.filename:
+
+            filename = file.filename
+
+            path = os.path.join("uploads", filename)
+
+            file.save(path)
+
+            fotos.append(filename)
+
+        else:
+
+            fotos.append(None)
+
     data = {
         "nombre": request.form.get("nombre"),
         "pedido_ml": request.form.get("pedido_ml"),
@@ -30,9 +50,9 @@ def complaint():
         "producto": request.form.get("producto"),
         "tipo": request.form.get("tipo"),
         "descripcion": request.form.get("descripcion"),
-        "foto1": None,
-        "foto2": None,
-        "foto3": None,
+        "foto1": fotos[0],
+        "foto2": fotos[1],
+        "foto3": fotos[2],
     }
 
     guardar_reclamo(data)
@@ -53,15 +73,18 @@ def complaint():
 
     try:
 
-        enviar_telegram(
-            f"""
-Nuevo reclamo
+        mensaje = f"""
+        Nuevo reclamo
 
-Pedido: {data['pedido_ml']}
-Cliente: {data['nombre']}
-Producto: {producto_real}
-"""
-        )
+        Pedido: {data['pedido_ml']}
+        Cliente: {data['nombre']}
+        Producto: {producto_real}
+        """
+
+        for foto in [data["foto1"], data["foto2"], data["foto3"]]:
+
+            if foto:
+                enviar_telegram(mensaje, foto)
 
     except Exception as e:
 
