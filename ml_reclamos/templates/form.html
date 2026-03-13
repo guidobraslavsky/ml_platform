@@ -69,8 +69,19 @@
 
         .preview img {
             max-width: 100%;
-            max-height: 150px;
+            max-height: 120px;
             margin-top: 10px;
+            border-radius: 6px;
+        }
+
+        .productoInfo {
+            display: none;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .productoInfo img {
+            max-width: 120px;
             border-radius: 6px;
         }
 
@@ -99,6 +110,14 @@
 
             <input name="pedido_ml" id="pedido_ml" placeholder="Número de pedido Mercado Libre" required>
 
+            <div id="productoInfo" class="productoInfo">
+
+                <img id="productoFoto">
+
+                <p id="productoTitulo"></p>
+
+            </div>
+
             <input name="contacto" placeholder="Email o WhatsApp" required>
 
             <input name="producto" id="producto" placeholder="Producto" readonly>
@@ -115,13 +134,13 @@
             <textarea name="descripcion" placeholder="Descripción del problema"></textarea>
 
             <label>Foto del producto</label>
-            <input type="file" name="foto1" accept="image/*">
+            <input type="file" name="foto1" id="foto1" accept="image/*">
 
             <label>Otra foto (opcional)</label>
-            <input type="file" name="foto2" accept="image/*">
+            <input type="file" name="foto2" id="foto2" accept="image/*">
 
             <label>Tercera foto (opcional)</label>
-            <input type="file" name="foto3" accept="image/*">
+            <input type="file" name="foto3" id="foto3" accept="image/*">
 
             <button type="submit">
                 Enviar reclamo
@@ -137,10 +156,17 @@
 
     <script>
 
-        /* AUTOCOMPLETAR PRODUCTO */
+        /* ELEMENTOS */
 
         const pedidoInput = document.getElementById("pedido_ml")
         const productoInput = document.getElementById("producto")
+
+        const productoInfo = document.getElementById("productoInfo")
+        const productoFoto = document.getElementById("productoFoto")
+        const productoTitulo = document.getElementById("productoTitulo")
+
+
+        /* AUTOCOMPLETAR PRODUCTO DESDE ML */
 
         pedidoInput.addEventListener("blur", async () => {
 
@@ -151,19 +177,62 @@
             try {
 
                 const response = await fetch(`/order_info?order=${order}`)
+
                 const data = await response.json()
 
-                if (data.producto) {
+                if (data.ok) {
+
                     productoInput.value = data.producto
+
+                    productoInfo.style.display = "block"
+
+                    productoFoto.src = data.foto
+
+                    productoTitulo.innerHTML = `
+<b>${data.producto}</b><br>
+Cantidad: ${data.cantidad}<br>
+Precio: $${data.precio}<br>
+Fecha: ${data.fecha}
+`
+
                 }
 
             } catch (e) {
 
-                console.log("error consultando pedido")
+                console.log("Error consultando pedido")
 
             }
 
         })
+
+
+        /* PREVIEW IMAGENES */
+
+        function preview(input) {
+
+            input.addEventListener("change", function () {
+
+                const file = this.files[0]
+
+                if (file) {
+
+                    const img = document.createElement("img")
+
+                    img.src = URL.createObjectURL(file)
+
+                    img.style.maxWidth = "100px"
+
+                    this.parentNode.appendChild(img)
+
+                }
+
+            })
+
+        }
+
+        preview(document.getElementById("foto1"))
+        preview(document.getElementById("foto2"))
+        preview(document.getElementById("foto3"))
 
 
         /* ENVIAR FORMULARIO */
@@ -177,8 +246,10 @@
             const formData = new FormData(form)
 
             await fetch("/complaint", {
+
                 method: "POST",
                 body: formData
+
             })
 
             form.style.display = "none"

@@ -3,13 +3,23 @@ from ml_core.ml_api import MercadoLibreClient
 ml = MercadoLibreClient()
 
 
-def obtener_producto(order_id):
+def obtener_info_pedido(order_id):
 
     order = ml.get_order(order_id)
 
     if not order:
         return None
 
-    item = order["order_items"][0]
+    order_item = order["order_items"][0]
 
-    return item["item"]["title"]
+    item_id = order_item["item"]["id"]
+
+    item = ml.get_item(item_id)
+
+    return {
+        "producto": order_item["item"]["title"],
+        "foto": item.get("thumbnail"),
+        "cantidad": order_item["quantity"],
+        "precio": order_item["unit_price"],
+        "fecha": order["date_created"],
+    }

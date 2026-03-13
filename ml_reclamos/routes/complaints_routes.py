@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, request, jsonify, current_app
 from database import guardar_reclamo
 from telegram_service import enviar_telegram
 from email_service import enviar_email
-from ml_service import obtener_producto
+from ml_service import obtener_info_pedido
 import os
 
 complaint_bp = Blueprint("complaints", __name__)
@@ -58,7 +58,7 @@ def complaint():
     guardar_reclamo(data)
 
     try:
-        producto_real = obtener_producto(data["pedido_ml"])
+        producto_real = obtener_info_pedido(data["pedido_ml"])
     except Exception as e:
         print("ERROR ML:", e)
         producto_real = data["producto"]
@@ -93,14 +93,30 @@ def complaint():
     return {"status": "ok"}
 
 
+from flask import jsonify
+from ml_service import obtener_info_pedido
+
+
 @complaint_bp.route("/order_info")
 def order_info():
 
     order_id = request.args.get("order")
 
     if not order_id:
-        return jsonify({"producto": None})
+        return jsonify({"ok": False})
 
-    producto = obtener_producto(order_id)
+    info = obtener_info_pedido(order_id)
 
-    return jsonify({"producto": producto})
+    if not info:
+        return jsonify({"ok": False})
+
+    return jsonify(
+        {
+            "ok": True,
+            "producto": info["producto"],
+            "foto": info["foto"],
+            "cantidad": info["cantidad"],
+            "precio": info["precio"],
+            "fecha": info["fecha"],
+        }
+    )
