@@ -164,3 +164,14 @@ class MercadoLibreClient:
                 )
 
         return ready_orders
+
+    def get_item(self, item_id):
+
+        url = f"{self.base_url}/items/{item_id}"
+
+        r = requests.get(url, headers=self._headers())
+
+        if r.status_code == 200:
+            return r.json()
+
+        return None
