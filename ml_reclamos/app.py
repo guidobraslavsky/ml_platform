@@ -9,7 +9,7 @@ load_dotenv()
 
 app = Flask(__name__)
 
-UPLOAD_FOLDER = "uploads"
+UPLOAD_FOLDER = os.path.join(os.getcwd(), "uploads")
 
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 app.secret_key = os.getenv("FLASK_SECRET_KEY", "secret_key")
@@ -20,6 +20,11 @@ app.register_blueprint(admin_bp)
 app.register_blueprint(complaint_bp)
 
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
+
+@app.route("/")
+def home():
+    return "Sistema de reclamos activo"
 
 
 @app.route("/uploads/<filename>")
