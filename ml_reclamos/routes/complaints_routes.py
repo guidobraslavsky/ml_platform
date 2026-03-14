@@ -1,9 +1,9 @@
 from flask import Blueprint, render_template, request, jsonify, current_app
-from database import guardar_reclamo
-from telegram_service import enviar_telegram
-from email_service import enviar_email
-from ml_service import obtener_info_pedido
-from mensajes_service import generar_mensaje
+from ml_reclamos.database import guardar_reclamo
+from ml_reclamos.email_service import enviar_email
+from ml_reclamos.telegram_service import enviar_telegram
+from ml_reclamos.ml_service import obtener_info_pedido
+from ml_reclamos.mensajes_service import generar_mensaje
 import os
 
 complaint_bp = Blueprint("complaints", __name__)

@@ -1,14 +1,14 @@
 from flask import Blueprint, render_template, request, redirect, session, redirect
 import os
 from dotenv import load_dotenv
-from database import (
+from ml_reclamos.database import (
     obtener_reclamos,
+    obtener_reclamo,
     marcar_resuelto,
     buscar_reclamo_por_pedido,
-    obtener_reclamo,
 )
-from email_service import enviar_email, enviar_email_resuelto
-from telegram_service import enviar_telegram
+from ml_reclamos.email_service import enviar_email_resuelto
+from ml_reclamos.telegram_service import enviar_telegram
 
 load_dotenv()
 

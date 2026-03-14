@@ -1,8 +1,8 @@
 from dotenv import load_dotenv
 from flask import Flask, send_from_directory
-from routes.complaints_routes import complaint_bp
-from routes.admin_routes import admin_bp
-from database import init_db
+from ml_reclamos.routes.complaints_routes import complaint_bp
+from ml_reclamos.routes.admin_routes import admin_bp
+from ml_reclamos.database import init_db
 import os
 
 load_dotenv()
