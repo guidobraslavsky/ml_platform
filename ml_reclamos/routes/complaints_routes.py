@@ -54,24 +54,14 @@ def complaint():
     guardar_reclamo(data)
 
     # ---------- PRODUCTO ----------
-    try:
+    # Usamos el producto que ingresó el cliente
+    producto_real = data["producto"]
 
-        info = obtener_info_pedido(data["pedido_ml"])
-
-        if info:
-            producto_real = info.get("producto")
-        else:
-            producto_real = data["producto"]
-
-    except Exception as e:
-
-        print("ERROR ML:", e)
-
-        producto_real = data["producto"]
+    print("PRODUCTO DETECTADO:", producto_real)
 
     # ---------- EMAIL ----------
-    print("PRODUCTO DETECTADO", producto_real)
     try:
+
         mensaje = generar_mensaje(
             data["nombre"], data["pedido_ml"], producto_real, data["tipo"]
         )
@@ -103,28 +93,3 @@ Tipo: {data['tipo']}
         print("ERROR TELEGRAM:", e)
 
     return {"status": "ok"}
-
-
-@complaint_bp.route("/order_info")
-def order_info():
-
-    order_id = request.args.get("order")
-
-    if not order_id:
-        return jsonify({"ok": False})
-
-    info = obtener_info_pedido(order_id)
-
-    if not info:
-        return jsonify({"ok": False})
-
-    return jsonify(
-        {
-            "ok": True,
-            "producto": info["producto"],
-            "foto": info["foto"],
-            "cantidad": info["cantidad"],
-            "precio": info["precio"],
-            "fecha": info["fecha"],
-        }
-    )
