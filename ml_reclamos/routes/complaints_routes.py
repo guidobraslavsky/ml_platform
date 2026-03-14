@@ -3,6 +3,7 @@ from database import guardar_reclamo
 from telegram_service import enviar_telegram
 from email_service import enviar_email
 from ml_service import obtener_info_pedido
+from mensajes_service import generar_mensaje
 import os
 
 complaint_bp = Blueprint("complaints", __name__)
@@ -69,8 +70,13 @@ def complaint():
     # ---------- EMAIL ----------
     print("PRODUCTO DETECTADO", producto_real)
     try:
+        mensaje = generar_mensaje(
+            data["nombre"], data["pedido_ml"], producto_real, data["tipo"]
+        )
 
-        enviar_email(data["contacto"], data["nombre"], data["pedido_ml"], producto_real)
+        enviar_email(
+            data["contacto"], data["nombre"], data["pedido_ml"], producto_real, mensaje
+        )
 
     except Exception as e:
 

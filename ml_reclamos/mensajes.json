@@ -1,0 +1,6 @@
+{
+    "Producto dañado": "Hola {nombre},\n\nLamentamos que el producto haya llegado dañado.\n\nNuestro equipo revisará tu caso relacionado con el pedido {pedido} sobre el producto:\n\n{producto}\n\nTe responderemos lo antes posible para solucionarlo.\n\nGracias por contactarnos.",
+    "Falta pieza": "Hola {nombre},\n\nGracias por avisarnos.\n\nRevisaremos tu pedido {pedido} relacionado con el producto:\n\n{producto}\n\npara enviarte la pieza faltante lo antes posible.",
+    "No funciona": "Hola {nombre},\n\nGracias por contactarnos.\n\nRevisaremos el problema reportado en tu pedido {pedido} sobre el producto:\n\n{producto}\n\nNuestro equipo te responderá pronto para ayudarte.",
+    "Otro": "Hola {nombre},\n\nRecibimos tu consulta relacionada con el pedido {pedido} sobre el producto:\n\n{producto}\n\nNuestro equipo revisará el caso y te responderemos pronto.\n\nGracias por contactarnos."
+}

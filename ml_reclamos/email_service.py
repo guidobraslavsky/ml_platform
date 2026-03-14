@@ -9,7 +9,7 @@ resend.api_key = os.getenv("RESEND_API_KEY")
 EMAIL_FROM = os.getenv("EMAIL_FROM")
 
 
-def enviar_email(cliente_email, nombre, pedido, producto):
+def enviar_email(cliente_email, nombre, pedido, producto, mensaje):
 
     resend.Emails.send(
         {
@@ -26,11 +26,11 @@ def enviar_email(cliente_email, nombre, pedido, producto):
 
 <p>Hola <b>{nombre}</b>,</p>
 
-<p>
-Gracias por contactarnos. Recibimos tu mensaje relacionado con el pedido:
-</p>
+<p>{mensaje.replace("\n","<br>")}</p>
 
-<p style="font-size:18px">
+<p>
+Pedido:
+<br>
 <b>{pedido}</b>
 </p>
 
@@ -38,14 +38,6 @@ Gracias por contactarnos. Recibimos tu mensaje relacionado con el pedido:
 Producto:
 <br>
 <b>{producto}</b>
-</p>
-
-<p>
-Nuestro equipo revisará tu caso y te responderemos lo antes posible.
-</p>
-
-<p>
-Si necesitas agregar información adicional puedes responder directamente a este correo.
 </p>
 
 <hr>
