@@ -5,7 +5,7 @@ import sqlite3
 
 load_dotenv()
 
-DB = os.getenv("DB")
+DB = os.path.join(os.path.dirname(__file__), "reclamos.db")
 
 
 def init_db():
