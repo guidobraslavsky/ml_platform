@@ -1,0 +1,1 @@
+Plataforma de Mercado Libre que imprime automáticamente cuando llegan nuevas ventas y tiene un sistema de reclamos automatizado que contesta de manera automática por email los reclamos de los compradores consultando a la API de ML
