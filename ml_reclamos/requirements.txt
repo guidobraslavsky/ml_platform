@@ -6,4 +6,4 @@ qrcode
 reportlab
 pillow
 gunicorn
-
+resend
