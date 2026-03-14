@@ -1,0 +1,9 @@
+-e ./ml_core
+Flask
+requests
+python-dotenv
+qrcode
+reportlab
+pillow
+gunicorn
+

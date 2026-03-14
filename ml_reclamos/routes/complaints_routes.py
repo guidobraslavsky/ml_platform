@@ -10,6 +10,8 @@ complaint_bp = Blueprint("complaints", __name__)
 
 UPLOAD_FOLDER = "uploads"
 
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
 
 @complaint_bp.route("/")
 def form():
