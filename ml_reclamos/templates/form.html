@@ -27,7 +27,24 @@
 
         h2 {
             text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .info {
+            background: #eef4ff;
+            padding: 15px;
+            border-radius: 8px;
             margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .info h3 {
+            margin: 0;
+            color: #3483fa;
+        }
+
+        .info p {
+            margin: 5px 0;
         }
 
         input,
@@ -67,6 +84,24 @@
             background: #2968c8;
         }
 
+        /* PREVIEW IMAGEN */
+
+        .preview {
+            width: 120px;
+            height: 120px;
+            overflow: hidden;
+            border-radius: 8px;
+            margin-top: 10px;
+        }
+
+        .preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* MENSAJE OK */
+
         .success {
 
             display: none;
@@ -76,12 +111,6 @@
             margin-top: 20px;
 
         }
-
-        .preview img {
-            max-width: 100px;
-            margin-top: 10px;
-            border-radius: 6px;
-        }
     </style>
 
 </head>
@@ -90,7 +119,21 @@
 
     <div class="container">
 
-        <h2>¿Tuviste algún problema con tu producto?</h2>
+        <h2>Soporte postventa</h2>
+
+        <div class="info">
+
+            <h3>¿Tuviste algún problema con tu producto?</h3>
+
+            <p>
+                Escaneá este código y nuestro equipo te ayudará.
+            </p>
+
+            <p>
+                Respondemos en menos de 24 horas.
+            </p>
+
+        </div>
 
         <form id="reclamoForm" enctype="multipart/form-data">
 
@@ -114,13 +157,10 @@
             <textarea name="descripcion" placeholder="Descripción del problema"></textarea>
 
             <label>Foto del producto</label>
-            <input type="file" name="foto1" accept="image/*">
 
-            <label>Otra foto (opcional)</label>
-            <input type="file" name="foto2" accept="image/*">
+            <input type="file" name="foto1" accept="image/*" required>
 
-            <label>Tercera foto (opcional)</label>
-            <input type="file" name="foto3" accept="image/*">
+            <div id="previewContainer"></div>
 
             <button type="submit">
                 Enviar reclamo
@@ -136,32 +176,33 @@
 
     <script>
 
-        /* PREVIEW IMÁGENES */
+        /* PREVIEW FOTO */
 
-        function preview(input) {
+        const fotoInput = document.querySelector("input[name='foto1']")
+        const previewContainer = document.getElementById("previewContainer")
 
-            input.addEventListener("change", function () {
+        fotoInput.addEventListener("change", function () {
 
-                const file = this.files[0]
+            previewContainer.innerHTML = ""
 
-                if (file) {
+            const file = this.files[0]
 
-                    const img = document.createElement("img")
+            if (file) {
 
-                    img.src = URL.createObjectURL(file)
+                const preview = document.createElement("div")
+                preview.className = "preview"
 
-                    this.parentNode.appendChild(img)
+                const img = document.createElement("img")
 
-                }
+                img.src = URL.createObjectURL(file)
 
-            })
+                preview.appendChild(img)
 
-        }
+                previewContainer.appendChild(preview)
 
-        preview(document.querySelector("input[name='foto1']"))
-        preview(document.querySelector("input[name='foto2']"))
-        preview(document.querySelector("input[name='foto3']"))
+            }
 
+        })
 
         /* ENVIAR FORMULARIO */
 

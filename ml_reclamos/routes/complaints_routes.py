@@ -23,26 +23,20 @@ def complaint():
 
     print("RECLAMO RECIBIDO")
 
-    fotos = []
+    # ---------- FOTO ----------
+    file = request.files.get("foto1")
 
-    for campo in ["foto1", "foto2", "foto3"]:
+    filename = None
 
-        file = request.files.get(campo)
+    if file and file.filename:
 
-        if file and file.filename:
+        filename = file.filename
 
-            filename = file.filename
+        path = os.path.join(UPLOAD_FOLDER, filename)
 
-            path = os.path.join("uploads", filename)
+        file.save(path)
 
-            file.save(path)
-
-            fotos.append(filename)
-
-        else:
-
-            fotos.append(None)
-
+    # ---------- DATOS ----------
     data = {
         "nombre": request.form.get("nombre"),
         "pedido_ml": request.form.get("pedido_ml"),
@@ -50,19 +44,30 @@ def complaint():
         "producto": request.form.get("producto"),
         "tipo": request.form.get("tipo"),
         "descripcion": request.form.get("descripcion"),
-        "foto1": fotos[0],
-        "foto2": fotos[1],
-        "foto3": fotos[2],
+        "foto1": filename,
     }
 
+    # ---------- GUARDAR DB ----------
     guardar_reclamo(data)
 
+    # ---------- PRODUCTO ----------
     try:
-        producto_real = obtener_info_pedido(data["pedido_ml"])
+
+        info = obtener_info_pedido(data["pedido_ml"])
+
+        if info:
+            producto_real = info.get("producto")
+        else:
+            producto_real = data["producto"]
+
     except Exception as e:
+
         print("ERROR ML:", e)
+
         producto_real = data["producto"]
 
+    # ---------- EMAIL ----------
+    print("PRODUCTO DETECTADO", producto_real)
     try:
 
         enviar_email(data["contacto"], data["nombre"], data["pedido_ml"], producto_real)
@@ -71,30 +76,25 @@ def complaint():
 
         print("ERROR EMAIL:", e)
 
+    # ---------- TELEGRAM ----------
     try:
 
-        mensaje = f"""
-        Nuevo reclamo
+        enviar_telegram(
+            f"""
+Nuevo reclamo
 
-        Pedido: {data['pedido_ml']}
-        Cliente: {data['nombre']}
-        Producto: {producto_real}
-        """
-
-        for foto in [data["foto1"], data["foto2"], data["foto3"]]:
-
-            if foto:
-                enviar_telegram(mensaje, foto)
+Pedido: {data['pedido_ml']}
+Cliente: {data['nombre']}
+Producto: {producto_real}
+Tipo: {data['tipo']}
+"""
+        )
 
     except Exception as e:
 
         print("ERROR TELEGRAM:", e)
 
     return {"status": "ok"}
-
-
-from flask import jsonify
-from ml_service import obtener_info_pedido
 
 
 @complaint_bp.route("/order_info")

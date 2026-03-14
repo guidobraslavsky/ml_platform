@@ -15,41 +15,105 @@ def enviar_email(cliente_email, nombre, pedido, producto):
         {
             "from": EMAIL_FROM,
             "to": cliente_email,
-            "subject": "Recibimos tu reclamo",
+            "subject": f"Recibimos tu consulta - Pedido {pedido}",
             "html": f"""
-        <h3>Hola {nombre}</h3>
+<html>
+<body style="font-family: Arial; background:#f5f5f5; padding:20px;">
 
-        <p>Recibimos tu reclamo.</p>
+<div style="max-width:600px;margin:auto;background:white;padding:30px;border-radius:8px">
 
-        <p>
-        <b>Pedido:</b> {pedido}<br>
-        <b>Producto:</b> {producto}
-        </p>
+<h2 style="color:#3483fa">Atención al cliente</h2>
 
-        <p>Nuestro equipo revisará el caso y te responderemos pronto.</p>
+<p>Hola <b>{nombre}</b>,</p>
 
-        <p>Gracias por contactarnos.</p>
-        """,
+<p>
+Gracias por contactarnos. Recibimos tu mensaje relacionado con el pedido:
+</p>
+
+<p style="font-size:18px">
+<b>{pedido}</b>
+</p>
+
+<p>
+Producto:
+<br>
+<b>{producto}</b>
+</p>
+
+<p>
+Nuestro equipo revisará tu caso y te responderemos lo antes posible.
+</p>
+
+<p>
+Si necesitas agregar información adicional puedes responder directamente a este correo.
+</p>
+
+<hr>
+
+<p style="color:#777">
+Gracias por tu compra.<br>
+Equipo de Atención al Cliente
+</p>
+
+</div>
+
+</body>
+</html>
+""",
         }
     )
 
 
-def enviar_email_resuelto(email, nombre, pedido, producto):
+def enviar_email_resuelto(cliente_email, nombre, pedido, producto):
 
-    subject = f"Reclamo resuelto - Pedido {pedido}"
+    resend.Emails.send(
+        {
+            "from": EMAIL_FROM,
+            "to": cliente_email,
+            "subject": f"Reclamo resuelto - Pedido {pedido}",
+            "html": f"""
+<html>
+<body style="font-family: Arial; background:#f5f5f5; padding:20px;">
 
-    mensaje = f"""
-Hola {nombre},
+<div style="max-width:600px;margin:auto;background:white;padding:30px;border-radius:8px">
 
-Tu reclamo sobre el producto:
+<h2 style="color:#28a745">Reclamo resuelto</h2>
 
-{producto}
+<p>Hola <b>{nombre}</b>,</p>
 
-ya fue resuelto por nuestro equipo.
+<p>
+Queremos informarte que tu consulta relacionada con el pedido:
+</p>
 
-Si necesitas más ayuda puedes responder a este email.
+<p style="font-size:18px">
+<b>{pedido}</b>
+</p>
 
-Gracias por tu compra.
-"""
+<p>
+Producto:
+<br>
+<b>{producto}</b>
+</p>
 
-    enviar_email(email, nombre, pedido, producto)
+<p>
+Tu reclamo ya fue revisado y resuelto por nuestro equipo.
+</p>
+
+<p>
+Si necesitas ayuda adicional puedes responder directamente a este correo.
+</p>
+
+<hr>
+
+<p style="color:#777">
+Gracias por tu compra.<br>
+Equipo de Atención al Cliente
+</p>
+
+</div>
+
+</body>
+</html>
+""",
+        }
+    )

@@ -66,25 +66,13 @@ def resolver(reclamo_id):
 
     marcar_resuelto(reclamo_id)
 
-    mensaje = f"""
-Hola {reclamo['nombre']},
-
-Tu reclamo relacionado con el pedido {reclamo['pedido_ml']}
-sobre el producto:
-
-{reclamo['producto']}
-
-ha sido resuelto por nuestro equipo.
-
-Si necesitas más ayuda puedes responder a este email.
-
-Gracias por tu compra.
-"""
-
     try:
 
-        enviar_email(
-            reclamo["contacto"], reclamo["nombre"], reclamo["pedido_ml"], mensaje
+        enviar_email_resuelto(
+            reclamo["contacto"],
+            reclamo["nombre"],
+            reclamo["pedido_ml"],
+            reclamo["producto"],
         )
 
     except Exception as e:
