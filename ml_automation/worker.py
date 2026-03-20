@@ -1,6 +1,7 @@
 import time
 import traceback
 
+from ml_core.ads.brain import ejecutar_brain
 from ml_core.ml_api import MercadoLibreClient
 from ml_core.db import (
     queue_event,
@@ -9,12 +10,20 @@ from ml_core.db import (
     increment_attempts,
     is_shipment_already_printed,
     mark_shipment_printed,
+    get_productos,
+    update_price,
+    update_budget,
 )
+
+from ml_service import sync_products
 
 from ml_automation.print_service import imprimir_zpl
 
 
 ml = MercadoLibreClient()
+
+last_sync = 0
+last_brain = 0
 
 POLL_INTERVAL = 10
 
@@ -87,6 +96,24 @@ def process_event():
         increment_attempts(event_id)
 
 
+def run_brain_cycle():
+    productos = get_productos()
+
+    if not productos:
+        print("⚠️ No hay productos")
+        return
+
+    resultados = ejecutar_brain(productos)
+
+    for r in resultados:
+        update_price(r["id"], r["price"])
+        update_budget(r["id"], r["budget"])
+
+        print(
+            f"[BRAIN] {r['id']} | score={r['score']} | ads={r['ads_action']} | price={r['price']}"
+        )
+
+
 def worker():
 
     print("🚀 Worker iniciado")
@@ -94,6 +121,17 @@ def worker():
     while True:
 
         try:
+            # 🔄 SYNC cada 1h
+            if time.time() - last_sync > 60:
+                print("🔄 Sync ML data...")
+                sync_products()
+                last_sync = time.time()
+
+            # 🧠 BRAIN cada 6h
+            if time.time() - last_brain > 120:
+                print("🧠 Running Brain...")
+                run_brain_cycle()
+                last_brain = time.time()
 
             detect_new_orders()
 

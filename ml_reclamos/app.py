@@ -1,15 +1,16 @@
 from dotenv import load_dotenv
-from flask import Flask, send_from_directory
+from flask import Flask, send_from_directory, jsonify
 from ml_reclamos.routes.complaints_routes import complaint_bp
 from ml_reclamos.routes.admin_routes import admin_bp
 from ml_reclamos.database import init_db
+from ml_core.ads import run_ads_optimizer
 import os
 
 load_dotenv()
 
 app = Flask(__name__)
 
-UPLOAD_FOLDER = os.path.join(os.getcwd(), "uploads")
+UPLOAD_FOLDER = "uploads"
 
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 app.secret_key = os.getenv("FLASK_SECRET_KEY", "secret_key")
@@ -31,6 +32,12 @@ def home():
 def uploaded_file(filename):
 
     return send_from_directory(UPLOAD_FOLDER, filename)
+
+
+@app.route("/ads/optimize")
+def optimize_ads():
+    resultados = run_ads_optimizer()
+    return jsonify(resultados)
 
 
 if __name__ == "__main__":

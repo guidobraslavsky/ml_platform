@@ -93,6 +93,23 @@ def init_db():
     conn.commit()
     conn.close()
 
+    # PRODUCTS (Ads + Brain)
+    cur.execute(
+        """
+    CREATE TABLE IF NOT EXISTS productos (
+        id TEXT PRIMARY KEY,
+        price REAL,
+        visits INTEGER DEFAULT 0,
+        orders INTEGER DEFAULT 0,
+        ads_cost REAL DEFAULT 0,
+        budget REAL DEFAULT 0,
+        available_quantity INTEGER DEFAULT 0,
+        rating REAL DEFAULT 4.5,
+        last_updated REAL
+    )
+    """
+    )
+
 
 print("📂 DB path usado por worker:", os.path.abspath(DB_NAME))
 
@@ -272,5 +289,69 @@ def mark_shipment_printed(shipment_id):
         (shipment_id, time.time()),
     )
 
+    conn.commit()
+    conn.close()
+
+
+def upsert_producto(p):
+    conn = get_connection()
+    cur = conn.cursor()
+
+    cur.execute(
+        """
+        INSERT INTO productos (id, price, visits, orders, ads_cost, budget, available_quantity, rating, last_updated)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ON CONFLICT(id) DO UPDATE SET
+            price=excluded.price,
+            visits=excluded.visits,
+            orders=excluded.orders,
+            ads_cost=excluded.ads_cost,
+            budget=excluded.budget,
+            available_quantity=excluded.available_quantity,
+            rating=excluded.rating,
+            last_updated=excluded.last_updated
+    """,
+        (
+            p["id"],
+            p["price"],
+            p["visits"],
+            p["orders"],
+            p.get("ads_cost", 0),
+            p.get("budget", 0),
+            p["available_quantity"],
+            p.get("rating", 4.5),
+            time.time(),
+        ),
+    )
+
+    conn.commit()
+    conn.close()
+
+
+def get_productos():
+    conn = get_connection()
+    cur = conn.cursor()
+
+    cur.execute("SELECT * FROM productos")
+    rows = cur.fetchall()
+    conn.close()
+
+    return [dict(r) for r in rows]
+
+
+def update_price(item_id, price):
+    conn = get_connection()
+    cur = conn.cursor()
+
+    cur.execute("UPDATE productos SET price=? WHERE id=?", (price, item_id))
+    conn.commit()
+    conn.close()
+
+
+def update_budget(item_id, budget):
+    conn = get_connection()
+    cur = conn.cursor()
+
+    cur.execute("UPDATE productos SET budget=? WHERE id=?", (budget, item_id))
     conn.commit()
     conn.close()
