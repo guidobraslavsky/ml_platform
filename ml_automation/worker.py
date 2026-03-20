@@ -13,6 +13,7 @@ from ml_core.db import (
     get_productos,
     update_price,
     update_budget,
+    init_db,
 )
 
 from ml_service import sync_products
@@ -21,6 +22,8 @@ from ml_automation.print_service import imprimir_zpl
 
 
 ml = MercadoLibreClient()
+
+init_db()
 
 last_sync = 0
 last_brain = 0
